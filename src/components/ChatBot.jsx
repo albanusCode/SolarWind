@@ -1,831 +1,359 @@
-// import React, { useState } from "react";
-
-// const ChatBot = () => {
-//   const [chatOpen, setChatOpen] = useState(false);
-//   const [chatMessages, setChatMessages] = useState([]);
-//   const [userInput, setUserInput] = useState("");
-
-//   // Handle user pressing Enter
-//   const handleKeyDown = async (e) => {
-//     if (e.key === "Enter" && userInput.trim() !== "") {
-//       // Open chat if not already open
-//       if (!chatOpen) setChatOpen(true);
-
-//       // Add user message
-//       setChatMessages((prev) => [...prev, { sender: "user", text: userInput }]);
-
-//       try {
-//         // Make API call to OpenRouter
-//         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-//           method: "POST",
-//           headers: {
-//             "Authorization": "Bearer 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", // Replace with your API key
-//             "HTTP-Referer": "<YOUR_SITE_URL>", // Replace with your site URL
-//             "X-Title": "<Nasa>", // Replace with your site title
-//             "Content-Type": "application/json"
-//           },
-//           body: JSON.stringify({
-//             "model": "openai/gpt-oss-20b:freemty",
-//             "messages": [
-//               {
-//                 "role": "user",
-//                 "content": userInput
-//               }
-//             ]
-//           })
-//         });
-
-//         const data = await response.json();
-//         const assistantReply = data.choices[0].message.content;
-
-//         // Add assistant reply
-//         setChatMessages((prev) => [
-//           ...prev,
-//           { sender: "assistant", text: assistantReply }
-//         ]);
-//       } catch (error) {
-//         console.error("Error fetching from OpenRouter:", error);
-//         setChatMessages((prev) => [
-//           ...prev,
-//           { sender: "assistant", text: "Sorry, something went wrong. Please try again." }
-//         ]);
-//       }
-
-//       setUserInput(""); // Clear input
-//     }
-//   };
-
-//   return (
-//     <div className="absolute bottom-4 left-4">
-//       {/* Floating button */}
-//       <button
-//         onClick={() => setChatOpen(!chatOpen)}
-//         className="bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg transition w-12 h-12 sm:w-14 sm:h-14"
-//       >
-//         <span className="text-white text-xl">🤖</span>
-//       </button>
-
-//       {/* Input popup when chat is closed */}
-//       {!chatOpen && (
-//         <div className="absolute bottom-16 left-0 w-64 bg-black/80 p-2 rounded-xl shadow-lg border border-gray-700">
-//           <input
-//             type="text"
-//             value={userInput}
-//             onChange={(e) => setUserInput(e.target.value)}
-//             onKeyDown={handleKeyDown}
-//             placeholder="Where are we exploring today?"
-//             className="w-full px-3 py-2 rounded-md bg-gray-900 text-white text-sm outline-none placeholder-gray-400"
-//           />
-//         </div>
-//       )}
-
-//       {/* Full chat interface */}
-//       {chatOpen && (
-//         <div className="absolute bottom-16 left-0 w-72 sm:w-80 bg-black/90 text-white rounded-xl shadow-lg border border-gray-700 flex flex-col">
-//           {/* Chat messages */}
-//           <div className="p-3 flex-1 max-h-64 overflow-y-auto space-y-2">
-//             {chatMessages.map((msg, i) => (
-//               <div
-//                 key={i}
-//                 className={`p-2 rounded-lg text-sm max-w-[85%] ${
-//                   msg.sender === "user"
-//                     ? "bg-green-600 self-end ml-auto"
-//                     : "bg-gray-700 self-start mr-auto"
-//                 }`}
-//               >
-//                 {msg.text}
-//               </div>
-//             ))}
-//           </div>
-
-//           {/* Input */}
-//           <div className="p-2 border-t border-gray-700">
-//             <input
-//               type="text"
-//               value={userInput}
-//               onChange={(e) => setUserInput(e.target.value)}
-//               onKeyDown={handleKeyDown}
-//               placeholder="Type a message..."
-//               className="w-full px-3 py-2 rounded-md bg-gray-800 text-white text-sm outline-none placeholder-gray-400"
-//             />
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default ChatBot;
-
-
-
-
-
-// import React, { useState } from "react";
-
-// const ChatBot = () => {
-//   const [chatOpen, setChatOpen] = useState(false);
-//   const [chatMessages, setChatMessages] = useState([]);
-//   const [userInput, setUserInput] = useState("");
-
-//   // Fetch NASA POWER data for a single point
-//   const fetchNasaPowerData = async (lat, lon) => {
-//     const startDate = "20250101";
-//     const endDate = "20251231";
-//     const parameters = "ALLSKY_SFC_SW_DWN,T2M,WS10M"; // solar, temp, wind
-
-//     const url = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=${parameters}&community=RE&longitude=${lon}&latitude=${lat}&start=${startDate}&end=${endDate}&format=JSON`;
-
-//     try {
-//       const response = await fetch(url);
-//       const data = await response.json();
-//       return data.properties.parameter;
-//     } catch (err) {
-//       console.error("NASA API error:", err);
-//       return null;
-//     }
-//   };
-
-//   // Generate a grid of points within the bounding box
-//   const generateGrid = (bbox, rows = 4, cols = 4) => {
-//     const [minLon, minLat, maxLon, maxLat] = bbox.map(Number);
-//     const latStep = (maxLat - minLat) / (rows - 1);
-//     const lonStep = (maxLon - minLon) / (cols - 1);
-
-//     const points = [];
-//     for (let i = 0; i < rows; i++) {
-//       for (let j = 0; j < cols; j++) {
-//         points.push({ lat: minLat + i * latStep, lon: minLon + j * lonStep });
-//       }
-//     }
-//     return points;
-//   };
-
-//   // Reverse geocoding: lat/lon → address
-//   const getStreetName = async (lat, lon) => {
-//     try {
-//       const res = await fetch(
-//         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
-//       );
-//       const data = await res.json();
-//       return data.display_name || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-//     } catch (err) {
-//       console.error(err);
-//       return `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-//     }
-//   };
-
-//   // Get top locations for solar and wind
-//   const getTopLocations = async (city) => {
-//     // Geocode city
-//     const geoRes = await fetch(
-//       `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(city)}`
-//     );
-//     const geoData = await geoRes.json();
-//     if (!geoData.length) return `Could not find the city "${city}".`;
-
-//     const bbox = geoData[0].boundingbox; // [minLat, maxLat, minLon, maxLon]
-//     const points = generateGrid([bbox[2], bbox[0], bbox[3], bbox[1]], 4, 4);
-
-//     // Fetch NASA data for all points
-//     const pointData = await Promise.all(
-//       points.map(async (p) => {
-//         const data = await fetchNasaPowerData(p.lat, p.lon);
-//         if (!data) return null;
-//         const avgSolar =
-//           Object.values(data.ALLSKY_SFC_SW_DWN).reduce((a, b) => a + b, 0) /
-//           Object.values(data.ALLSKY_SFC_SW_DWN).length;
-//         const avgWind =
-//           Object.values(data.WS10M).reduce((a, b) => a + b, 0) /
-//           Object.values(data.WS10M).length;
-//         return { ...p, avgSolar, avgWind };
-//       })
-//     );
-
-//     const validPoints = pointData.filter(Boolean);
-
-//     // Rank by solar
-//     const topSolar = validPoints
-//       .sort((a, b) => b.avgSolar - a.avgSolar)
-//       .slice(0, 3);
-//     // Rank by wind
-//     const topWind = validPoints
-//       .sort((a, b) => b.avgWind - a.avgWind)
-//       .slice(0, 3);
-
-//     // Convert lat/lon to addresses
-//     const solarAddresses = await Promise.all(
-//       topSolar.map(async (p, idx) => {
-//         const address = await getStreetName(p.lat, p.lon);
-//         return `${idx + 1}. ${address} - Avg Solar: ${p.avgSolar.toFixed(2)} kWh/m²/day`;
-//       })
-//     );
-//     const windAddresses = await Promise.all(
-//       topWind.map(async (p, idx) => {
-//         const address = await getStreetName(p.lat, p.lon);
-//         return `${idx + 1}. ${address} - Avg Wind: ${p.avgWind.toFixed(2)} m/s`;
-//       })
-//     );
-
-//     return `Top Solar Locations in ${city}:\n${solarAddresses.join(
-//       "\n"
-//     )}\n\nTop Wind Locations in ${city}:\n${windAddresses.join("\n")}`;
-//   };
-
-//   // Handle user pressing Enter
-//   const handleKeyDown = async (e) => {
-//     if (e.key === "Enter" && userInput.trim() !== "") {
-//       if (!chatOpen) setChatOpen(true);
-
-//       // Add user message
-//       setChatMessages((prev) => [...prev, { sender: "user", text: userInput }]);
-//       const input = userInput;
-//       setUserInput("");
-
-//       // Detect location query
-//       const locationRegex = /in ([a-zA-Z\s]+)/i;
-//       const match = input.match(locationRegex);
-
-//       if (match) {
-//         const city = match[1].trim();
-//         const topLocations = await getTopLocations(city);
-//         setChatMessages((prev) => [
-//           ...prev,
-//           { sender: "assistant", text: topLocations },
-//         ]);
-//         return;
-//       }
-
-//       // Fallback to OpenRouter LLM
-//       try {
-//         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-//           method: "POST",
-//           headers: {
-//             "Authorization": "Bearer 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",
-//             "HTTP-Referer": "<YOUR_SITE_URL>",
-//             "X-Title": "<Nasa>",
-//             "Content-Type": "application/json",
-//           },
-//           body: JSON.stringify({
-//             model: "openai/gpt-oss-20b:freemty",
-//             messages: [{ role: "user", content: input }],
-//           }),
-//         });
-
-//         const data = await response.json();
-//         const assistantReply = data.choices[0].message.content;
-
-//         setChatMessages((prev) => [...prev, { sender: "assistant", text: assistantReply }]);
-//       } catch (error) {
-//         console.error("Error fetching from OpenRouter:", error);
-//         setChatMessages((prev) => [
-//           ...prev,
-//           { sender: "assistant", text: "Sorry, something went wrong. Please try again." },
-//         ]);
-//       }
-//     }
-//   };
-
-//   return (
-//     <div className="absolute bottom-4 left-4">
-//       {/* Floating button */}
-//       <button
-//         onClick={() => setChatOpen(!chatOpen)}
-//         className="bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg transition w-12 h-12 sm:w-14 sm:h-14"
-//       >
-//         <span className="text-white text-xl">🤖</span>
-//       </button>
-
-//       {/* Input popup when chat is closed */}
-//       {!chatOpen && (
-//         <div className="absolute bottom-16 left-0 w-64 bg-black/80 p-2 rounded-xl shadow-lg border border-gray-700">
-//           <input
-//             type="text"
-//             value={userInput}
-//             onChange={(e) => setUserInput(e.target.value)}
-//             onKeyDown={handleKeyDown}
-//             placeholder="Where are we exploring today?"
-//             className="w-full px-3 py-2 rounded-md bg-gray-900 text-white text-sm outline-none placeholder-gray-400"
-//           />
-//         </div>
-//       )}
-
-//       {/* Full chat interface */}
-//       {chatOpen && (
-//         <div className="absolute bottom-16 left-0 w-72 sm:w-80 bg-black/90 text-white rounded-xl shadow-lg border border-gray-700 flex flex-col">
-//           {/* Chat messages */}
-//           <div className="p-3 flex-1 max-h-64 overflow-y-auto space-y-2">
-//             {chatMessages.map((msg, i) => (
-//               <div
-//                 key={i}
-//                 className={`p-2 rounded-lg text-sm max-w-[85%] ${
-//                   msg.sender === "user"
-//                     ? "bg-green-600 self-end ml-auto"
-//                     : "bg-gray-700 self-start mr-auto"
-//                 }`}
-//               >
-//                 {msg.text}
-//               </div>
-//             ))}
-//           </div>
-
-//           {/* Input */}
-//           <div className="p-2 border-t border-gray-700">
-//             <input
-//               type="text"
-//               value={userInput}
-//               onChange={(e) => setUserInput(e.target.value)}
-//               onKeyDown={handleKeyDown}
-//               placeholder="Type a message..."
-//               className="w-full px-3 py-2 rounded-md bg-gray-800 text-white text-sm outline-none placeholder-gray-400"
-//             />
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default ChatBot;
-
-
-
-
-// import React, { useState } from "react";
-
-// const ChatBot = () => {
-//   const [chatOpen, setChatOpen] = useState(false);
-//   const [chatMessages, setChatMessages] = useState([]);
-//   const [userInput, setUserInput] = useState("");
-//   const [isLoading, setIsLoading] = useState(false);
-
-//   // Fetch NASA POWER data for a single point
-//   const fetchNasaPowerData = async (lat, lon) => {
-//     const startDate = "20230101"; // Adjusted to a past date for available data
-//     const endDate = "20231231";
-//     const parameters = "ALLSKY_SFC_SW_DWN,T2M,WS10M"; // Solar, temp, wind
-
-//     const url = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=${parameters}&community=RE&longitude=${lon}&latitude=${lat}&start=${startDate}&end=${endDate}&format=JSON`;
-
-//     try {
-//       const response = await fetch(url);
-//       if (!response.ok) throw new Error(`NASA API error: ${response.status}`);
-//       const data = await response.json();
-//       return data.properties.parameter;
-//     } catch (err) {
-//       console.error("NASA API error:", err);
-//       return null;
-//     }
-//   };
-
-//   // Generate a grid of points within the bounding box
-//   const generateGrid = (bbox, rows = 4, cols = 4) => {
-//     const [minLat, maxLat, minLon, maxLon] = bbox.map(Number);
-//     const latStep = (maxLat - minLat) / (rows - 1);
-//     const lonStep = (maxLon - minLon) / (cols - 1);
-
-//     const points = [];
-//     for (let i = 0; i < rows; i++) {
-//       for (let j = 0; j < cols; j++) {
-//         points.push({ lat: minLat + i * latStep, lon: minLon + j * lonStep });
-//       }
-//     }
-//     return points;
-//   };
-
-//   // Reverse geocoding: lat/lon → address
-//   const getStreetName = async (lat, lon) => {
-//     try {
-//       const res = await fetch(
-//         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`,
-//         { headers: { "User-Agent": "NasaChatBot/1.0" } } // Nominatim requires User-Agent
-//       );
-//       if (!res.ok) throw new Error(`Nominatim API error: ${res.status}`);
-//       const data = await res.json();
-//       return data.display_name || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-//     } catch (err) {
-//       console.error("Reverse geocoding error:", err);
-//       return `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-//     }
-//   };
-
-//   // Geocode city to bounding box
-//   const geocodeCity = async (city) => {
-//     try {
-//       const res = await fetch(
-//         `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(city)}`,
-//         { headers: { "User-Agent": "NasaChatBot/1.0" } }
-//       );
-//       if (!res.ok) throw new Error(`Geocoding API error: ${res.status}`);
-//       const data = await res.json();
-//       if (!data.length) return null;
-//       return data[0].boundingbox; // [minLat, maxLat, minLon, maxLon]
-//     } catch (err) {
-//       console.error("Geocoding error:", err);
-//       return null;
-//     }
-//   };
-
-//   // Get top locations for solar and wind
-//   const getTopLocations = async (city) => {
-//     setIsLoading(true);
-//     const bbox = await geocodeCity(city);
-//     if (!bbox) {
-//       setIsLoading(false);
-//       return `Could not find the city "${city}". Please check the spelling or try another location.`;
-//     }
-
-//     const points = generateGrid([bbox[0], bbox[1], bbox[2], bbox[3]], 4, 4);
-
-//     // Fetch NASA data for all points
-//     const pointData = await Promise.all(
-//       points.map(async (p) => {
-//         const data = await fetchNasaPowerData(p.lat, p.lon);
-//         if (!data) return null;
-//         const avgSolar =
-//           Object.values(data.ALLSKY_SFC_SW_DWN).reduce((a, b) => a + b, 0) /
-//           Object.values(data.ALLSKY_SFC_SW_DWN).length;
-//         const avgWind =
-//           Object.values(data.WS10M).reduce((a, b) => a + b, 0) /
-//           Object.values(data.WS10M).length;
-//         const avgTemp =
-//           Object.values(data.T2M).reduce((a, b) => a + b, 0) /
-//           Object.values(data.T2M).length;
-//         return { ...p, avgSolar, avgWind, avgTemp };
-//       })
-//     );
-
-//     const validPoints = pointData.filter(Boolean);
-//     if (!validPoints.length) {
-//       setIsLoading(false);
-//       return `No valid data found for ${city}. Please try another location.`;
-//     }
-
-//     // Rank by solar and wind
-//     const topSolar = validPoints
-//       .sort((a, b) => b.avgSolar - a.avgSolar)
-//       .slice(0, 3);
-//     const topWind = validPoints
-//       .sort((a, b) => b.avgWind - a.avgWind)
-//       .slice(0, 3);
-
-//     // Convert lat/lon to addresses
-//     const solarAddresses = await Promise.all(
-//       topSolar.map(async (p, idx) => {
-//         const address = await getStreetName(p.lat, p.lon);
-//         return `${idx + 1}. ${address}\n   - Solar: ${p.avgSolar.toFixed(2)} kWh/m²/day\n   - Temp: ${p.avgTemp.toFixed(2)} °C`;
-//       })
-//     );
-//     const windAddresses = await Promise.all(
-//       topWind.map(async (p, idx) => {
-//         const address = await getStreetName(p.lat, p.lon);
-//         return `${idx + 1}. ${address}\n   - Wind: ${p.avgWind.toFixed(2)} m/s\n   - Temp: ${p.avgTemp.toFixed(2)} °C`;
-//       })
-//     );
-
-//     setIsLoading(false);
-//     return `### Top Solar Locations in ${city}:\n${solarAddresses.join(
-//       "\n"
-//     )}\n\n### Top Wind Locations in ${city}:\n${windAddresses.join("\n")}`;
-//   };
-
-//   // Fallback to OpenRouter LLM
-//   const queryOpenRouter = async (input) => {
-//     try {
-//       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-//         method: "POST",
-//         headers: {
-//           "Authorization": "Bearer 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",
-//           "HTTP-Referer": window.location.origin,
-//           "X-Title": "NasaChatBot",
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify({
-//           model: "openai/gpt-oss-20b:freemty",
-//           messages: [{ role: "user", content: input }],
-//         }),
-//       });
-
-//       if (!response.ok) throw new Error(`OpenRouter API error: ${response.status}`);
-//       const data = await response.json();
-//       return data.choices[0].message.content;
-//     } catch (error) {
-//       console.error("OpenRouter error:", error);
-//       return "Sorry, I couldn't process your request. Please try again later.";
-//     }
-//   };
-
-//   // Handle user input
-//   const handleKeyDown = async (e) => {
-//     if (e.key !== "Enter" || userInput.trim() === "") return;
-
-//     if (!chatOpen) setChatOpen(true);
-//     setChatMessages((prev) => [...prev, { sender: "user", text: userInput }]);
-//     const input = userInput.trim();
-//     setUserInput("");
-//     setIsLoading(true);
-
-//     // Enhanced location detection
-//     const locationKeywords = ["in", "near", "at", "around"];
-//     const words = input.toLowerCase().split(/\s+/);
-//     let city = null;
-//     for (let i = 0; i < words.length; i++) {
-//       if (locationKeywords.includes(words[i]) && i + 1 < words.length) {
-//         city = words.slice(i + 1).join(" ");
-//         break;
-//       }
-//     }
-
-//     if (city) {
-//       const topLocations = await getTopLocations(city);
-//       setChatMessages((prev) => [...prev, { sender: "assistant", text: topLocations }]);
-//     } else {
-//       // Fallback to OpenRouter for general queries
-//       const assistantReply = await queryOpenRouter(input);
-//       setChatMessages((prev) => [...prev, { sender: "assistant", text: assistantReply }]);
-//     }
-
-//     setIsLoading(false);
-//   };
-
-//   return (
-//     <div className="absolute bottom-4 left-4">
-//       {/* Floating button */}
-//       <button
-//         onClick={() => setChatOpen(!chatOpen)}
-//         className="bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg transition w-12 h-12 sm:w-14 sm:h-14"
-//       >
-//         <span className="text-white text-xl">🤖</span>
-//       </button>
-
-//       {/* Input popup when chat is closed */}
-//       {!chatOpen && (
-//         <div className="absolute bottom-16 left-0 w-64 bg-black/80 p-2 rounded-xl shadow-lg border border-gray-700">
-//           <input
-//             type="text"
-//             value={userInput}
-//             onChange={(e) => setUserInput(e.target.value)}
-//             onKeyDown={handleKeyDown}
-//             placeholder="Ask about solar/wind in a city..."
-//             className="w-full px-3 py-2 rounded-md bg-gray-900 text-white text-sm outline-none placeholder-gray-400"
-//             disabled={isLoading}
-//           />
-//         </div>
-//       )}
-
-//       {/* Full chat interface */}
-//       {chatOpen && (
-//         <div className="absolute bottom-16 left-0 w-72 sm:w-80 bg-black/90 text-white rounded-xl shadow-lg border border-gray-700 flex flex-col">
-//           {/* Chat messages */}
-//           <div className="p-3 flex-1 max-h-64 overflow-y-auto space-y-2">
-//             {chatMessages.map((msg, i) => (
-//               <div
-//                 key={i}
-//                 className={`p-2 rounded-lg text-sm max-w-[85%] whitespace-pre-wrap ${
-//                   msg.sender === "user"
-//                     ? "bg-green-600 self-end ml-auto"
-//                     : "bg-gray-700 self-start mr-auto"
-//                 }`}
-//               >
-//                 {msg.text}
-//               </div>
-//             ))}
-//             {isLoading && (
-//               <div className="text-sm text-gray-400">Loading...</div>
-//             )}
-//           </div>
-
-//           {/* Input */}
-//           <div className="p-2 border-t border-gray-700">
-//             <input
-//               type="text"
-//               value={userInput}
-//               onChange={(e) => setUserInput(e.target.value)}
-//               onKeyDown={handleKeyDown}
-//               placeholder="Type a message..."
-//               className="w-full px-3 py-2 rounded-md bg-gray-800 text-white text-sm outline-none placeholder-gray-400"
-//               disabled={isLoading}
-//             />
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default ChatBot;
-
-
-
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 
 const ChatBot = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [userInput, setUserInput] = useState("");
+   
+ // Handle user pressing Enter
+ const handleKeyDown = async (e) => {
+   if (e.key === "Enter" && userInput.trim() !== "") {
+     if (!chatOpen) setChatOpen(true);
+ 
+     setChatMessages((prev) => [...prev, { sender: "user", text: userInput }]);
+ 
+     try {
+       let reply = "";
+ 
+       // Step 1: Ask LLM if API call is needed & extract/infer parameters if needed
+       const paramCheckResponse = await fetch(
+         "https://openrouter.ai/api/v1/chat/completions",
+         {
+           method: "POST",
+           headers: {
+             Authorization: "Bearer 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",
+             "HTTP-Referer": "<YOUR_SITE_URL>",
+             "X-Title": "<Nasa>",
+             "Content-Type": "application/json",
+           },
+           body: JSON.stringify({
+             model: "openai/gpt-oss-20b:free",
+             messages: [
+               {
+                 role: "system",
+                 content:
+                   `You are an expert renewable-energy analyst and GIS consultant.
+ Primary task: analyze the user’s natural-language input and generate all parameters required for a NASA POWER **regional** monthly data API request.
+ 
+ Strong requirements (must follow exactly):
+ 1. Always return a **regional** result (latitude-min, latitude-max, longitude-min, longitude-max). Never return a single-point JSON schema. If the user mentions a city/coordinate, infer a small regional box around that point (see rules below).
+ 2. Output **only** a JSON object in this exact structure (no text, no markdown, no explanation):
+ 
+ {
+   "start": <YYYY>,
+   "end": <YYYY>,
+   "latitude-min": <float>,
+   "latitude-max": <float>,
+   "longitude-min": <float>,
+   "longitude-max": <float>,
+   "community": "re",
+   "parameters": "ALLSKY_SFC_SW_DWN,WS10M,T2M,RH2M,PRECTOT"
+ }
+ 
+ 3. If the user’s input clearly cannot or should not be mapped to a geographic area (for example a purely conceptual, policy, financial, or formatting question), return null (literal null, no quotes). For any phrasing that could reasonably map to a place (including “best place for solar in X” or “where to plant a solar farm”), **infer** a region — do not return null.
+ 
+ Geographic inference rules:
+ - If the user provides an explicit bounding box or coordinates, validate and return them (clamp to valid ranges).
+ - If the user gives a city or specific coordinate, produce a **small** bounding box ≈ 2° × 2° centered on that location.
+ - If the user gives a small region or province, produce a **medium** bounding box ≈ 5°–10° × 5°–10° representing that region.
+ - If the user gives a country, produce an approximate national extent bounding box.
+ - If the user requests a vague/qualitative “best place” (e.g., “best place for solar in Africa”), infer a **promising subregion** using known solar-resource logic (favor high insolation, low cloud/precipitation, flat/low-slope land, and proximity to roads/grid). Choose a plausible bounding box that captures that subregion rather than returning a whole continent.
+ - If the user requests “global,” use:
+   latitude-min = -90, latitude-max = 90, longitude-min = -180, longitude-max = 180.
+ 
+ Temporal rules:
+ - If start/end years are provided, use them (years only, YYYY).
+ - If missing, default to the **last 5 years ending in the current year** (end = current year; start = current year − 4).
+ - Ensure start ≤ end and both are valid four-digit years.
+ 
+ Validation and formatting:
+ - Ensure latitude values are within [-90, 90] and longitude values within [-180, 180]. If needed, clip values to these ranges.
+ - Ensure latitude-min < latitude-max and longitude-min < longitude-max. If inference produces equal values, expand by 0.5° each side.
+ - Round all coordinate outputs to **one decimal place**.
+ - Always set "community": "re".
+ - Always set "parameters": "ALLSKY_SFC_SW_DWN,WS10M,T2M,RH2M,PRECTOT".
+ 
+ Behavioural rules:
+ - Prefer concrete inferred regions over returning null for under-specified geographic requests.
+ - Avoid returning excessively large boxes (do not return global extents unless explicitly asked).
+ - Do not include explanations, reasons, or extra keys in the output JSON.
+ - Output must be syntactically valid JSON only.
+ 
+ Edge cases:
+ - If the user gives multiple non-contiguous locations (e.g., “compare Morocco and Kenya”), infer a single bounding box that covers both countries reasonably (expanded to contain both); do not return multiple JSON objects.
+ - If the user asks for time series beyond the NASA POWER allowed span, clamp to reasonable years but still return a JSON object.
+ 
+ If the prompt cannot be satisfied because the user’s request is purely conceptual or non-geographic, return null.
+ `
+               },
+               {
+                 role: "user",
+                 content: `User input: "${userInput}"`
+               }
+             ],
+           }),
+         }
+       );
+ 
+       const paramCheckData = await paramCheckResponse.json();
+       console.log("parsed params", paramCheckData)
+         const parsedParams = JSON.parse(paramCheckData.choices[0].message.content);
+         console.log("parsed params", parsedParams)
+ 
+       if (parsedParams) {
+         // Step 2: Call NASA POWER API
+  // Assuming parsedParams is already defined, e.g.:
+ // const parsedParams = { start: 2021, end: 2025, "latitude-min": 6, "latitude-max": 12, "longitude-min": 24, "longitude-max": 30, community: "re", parameters: "ALLSKY_SFC_SW_DWN,WS10M,T2M,RH2M,PRECTOT" };
+ 
+ async function fetchRegionalNasaDataAnnual(parsedParams) {
+   const {
+     "latitude-min": latMin,
+     "latitude-max": latMax,
+     "longitude-min": lonMin,
+     "longitude-max": lonMax,
+     start,
+     end,
+     parameters,
+     community
+   } = parsedParams;
+ 
+   const paramList = parameters.split(",").map(p => p.trim());
+   const results = {};
+ 
+   // Split range to obey NASA 10° limit
+   const chunkRange = (min, max, step = 10) => {
+     const chunks = [];
+     for (let i = min; i < max; i += step) {
+       chunks.push({ min: i, max: Math.min(i + step, max) });
+     }
+     return chunks;
+   };
+ 
+   const latChunks = chunkRange(latMin, latMax, 10);
+   const lonChunks = chunkRange(lonMin, lonMax, 10);
+ 
+   for (const param of paramList) {
+     results[param] = [];
+ 
+     for (const lat of latChunks) {
+       for (const lon of lonChunks) {
+         const nasaUrl = `https://power.larc.nasa.gov/api/temporal/monthly/regional?parameters=${param}&start=${start}&end=${end}&latitude-min=${lat.min}&latitude-max=${lat.max}&longitude-min=${lon.min}&longitude-max=${lon.max}&community=${community}&format=JSON`;
+ 
+         try {
+           const response = await fetch(nasaUrl);
+           const data = await response.json();
+ 
+           if (!response.ok || !data?.features?.length) {
+             console.warn(`⚠️ Error for ${param}:`, data);
+             continue;
+           }
+ 
+           // Collect all monthly values from all tiles
+           const monthlyData = {};
+           for (const feature of data.features) {
+             const paramData = feature.properties?.parameter?.[param];
+             if (!paramData) continue;
+ 
+             for (const [key, val] of Object.entries(paramData)) {
+               if (!monthlyData[key]) monthlyData[key] = [];
+               monthlyData[key].push(val);
+             }
+           }
+ 
+           // Average across all tiles per month
+           const avgMonthly = {};
+           for (const [key, arr] of Object.entries(monthlyData)) {
+             avgMonthly[key] =
+               arr.reduce((a, b) => a + b, 0) / arr.length;
+           }
+ 
+           // Aggregate months → annual averages
+           const annualData = {};
+           Object.entries(avgMonthly).forEach(([key, value]) => {
+             const year = key.slice(0, 4);
+             if (!annualData[year]) annualData[year] = [];
+             annualData[year].push(value);
+           });
+ 
+           Object.keys(annualData).forEach((year) => {
+             const values = annualData[year];
+             const avg = values.reduce((a, b) => a + b, 0) / values.length;
+             annualData[year] = parseFloat(avg.toFixed(2));
+           });
+ 
+           results[param].push(annualData);
+         } catch (err) {
+           console.error(`❌ Failed for ${param} (${lat.min}-${lat.max}, ${lon.min}-${lon.max})`, err);
+         }
+       }
+     }
+   }
+ 
+   // Merge all chunks → single annual average per param
+   const summarized = {};
+   for (const param of paramList) {
+     const yearlyTotals = {};
+ 
+     results[param].forEach(tileData => {
+       for (const [year, val] of Object.entries(tileData)) {
+         if (!yearlyTotals[year]) yearlyTotals[year] = [];
+         yearlyTotals[year].push(val);
+       }
+     });
+ 
+     summarized[param] = {};
+     for (const [year, vals] of Object.entries(yearlyTotals)) {
+       const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+       summarized[param][year] = parseFloat(avg.toFixed(2));
+     }
+   }
+ 
+   const nasaAnnualData = {
+     region: { latMin, latMax, lonMin, lonMax },
+     start,
+     end,
+     parameters: paramList,
+     annual_summary: summarized,
+   };
+ 
+   console.log("✅ Annual NASA Regional Data:", nasaAnnualData);
+   return nasaAnnualData;
+ }
+ 
+ 
+ 
+ 
+ // Example usage
+ const nasaAnnualData = await fetchRegionalNasaDataAnnual(parsedParams);
+ 
+ // You can now use nasaData for heatmaps, analysis, etc.
+ console.log("Final Merged Data Object:", nasaAnnualData);
+ 
+ 
+         // Step 3: Ask LLM to analyze NASA data
+         const analysisResponse = await fetch(
+           "https://openrouter.ai/api/v1/chat/completions",
+           {
+             method: "POST",
+             headers: {
+               Authorization: "Bearer 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",
+               "HTTP-Referer": "<YOUR_SITE_URL>",
+               "X-Title": "<Nasa>",
+               "Content-Type": "application/json",
+             },
+             body: JSON.stringify({
+               model: "openai/gpt-oss-20b:free",
+               messages: [
+                 {
+                   role: "system",
+                   content:
+                     `
+ You are a renewable-energy analyst and geospatial expert interpreting NASA POWER API and related site data for Africa.
+ 
+ Your task: Recommend and describe the best locations in Africa for solar power projects based on the provided data or context.
+ 
+ Guidelines:
+ 1. Always mention a real location — a recognizable city or region (e.g., Garissa, Kenya; Ouarzazate, Morocco; Upington, South Africa).
+ 2. Keep your response short (under 8 sentences). Focus on insight, not raw data.
+ 3. Use plain, natural English — no tables, Markdown, or headings.
+ 4. Include human-relevant context: land suitability, distance to grid or roads, terrain, weather stability, and policy support.
+ 5. When possible, reference broader regional trends or nearby infrastructure (e.g., “close to major transmission lines” or “near existing solar developments”).
+ 6. Avoid coordinates, heavy statistics, or repetition.
+ 7. Write as if explaining to an investor, policymaker, or curious citizen — confident, practical, and concise.
+ 8. You may use knowledge of African geography and renewable-energy policy to infer details, even if not explicitly in the data.
+ 
+ Goal:
+ Produce a short, expert, but friendly summary identifying a *real place* that stands out for solar power potential, explaining why it’s promising in simple, insightful terms.
+ 
+ `                },
+                 {
+                   role: "user",
+                   content: `User asked: "${userInput}". Here is the NASA POWER data: ${JSON.stringify(
+                     nasaAnnualData
+                   )}. Provide a clear, actionable answer about renewable energy potential.`
+                 }
+               ],
+             }),
+           }
+         );
+ 
+         const analysisData = await analysisResponse.json();
+         reply = analysisData.choices[0].message.content;
+         console.log(analysisData)
+       } else {
+         // Step 4: If no API call is needed, just respond with LLM normally
+         const normalResponse = await fetch(
+           "https://openrouter.ai/api/v1/chat/completions",
+           {
+             method: "POST",
+             headers: {
+               Authorization: "Bearer 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",
+               "HTTP-Referer": "<YOUR_SITE_URL>",
+               "X-Title": "<Nasa>",
+               "Content-Type": "application/json",
+             },
+             body: JSON.stringify({
+               model: "openai/gpt-oss-20b:free",
+               messages: [{
+                 role: "system", content: `
+ You are an expert renewable energy assistant. 
+ 
+ - For follow-up questions, interpret the user query using previously fetched NASA POWER data if available.
+ - If no API data is needed, answer with insights, guidance, or explanations using general renewable energy knowledge.
+ - Provide clear, actionable, and concise answers.
+ - Highlight any assumptions or limitations.
+ `}, { role: "user", content: userInput }],
+             }),
+           }
+         );
+ 
+         const normalData = await normalResponse.json();
+         reply = normalData.choices[0].message.content;
+       }
+ 
+       setChatMessages((prev) => [...prev, { sender: "assistant", text: reply }]);
+     } catch (error) {
+       console.error(error);
+       setChatMessages((prev) => [
+         ...prev,
+         { sender: "assistant", text: "Sorry, something went wrong. Please try again." },
+       ]);
+     }
+ 
+     setUserInput("");
+   }
+ };
 
-  // Reverse geocode lat/lon to street
-  const getStreetName = async (lat, lon) => {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
-      );
-      const data = await res.json();
-      return data.display_name || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-    } catch {
-      return `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-    }
-  };
-
-  // Fetch NASA POWER data for a single point
-  const fetchNasaPowerData = async (lat, lon) => {
-    try {
-      const res = await fetch(
-        `https://power.larc.nasa.gov/api/temporal/daily/point?latitude=${lat}&longitude=${lon}&parameters=ALLSKY_SFC_SW_DWN,WS10M&format=JSON`
-      );
-      const data = await res.json();
-      return data.properties ? data.properties.parameter : null;
-    } catch {
-      return null;
-    }
-  };
-
-  // Get top solar + wind locations for a city
-  const getTopLocations = async (location) => {
-    try {
-      // Geocode city center
-      const geoRes = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
-          location
-        )}`
-      );
-      const geoData = await geoRes.json();
-      if (!geoData.length) return `Could not find "${location}".`;
-
-      const city = geoData[0];
-      const centerLat = parseFloat(city.lat);
-      const centerLon = parseFloat(city.lon);
-
-      // Small grid around city center (~5 km)
-      const delta = 0.025;
-      const points = [
-        { lat: centerLat, lon: centerLon },
-        { lat: centerLat + delta, lon: centerLon },
-        { lat: centerLat - delta, lon: centerLon },
-        { lat: centerLat, lon: centerLon + delta },
-        { lat: centerLat, lon: centerLon - delta },
-        { lat: centerLat + delta, lon: centerLon + delta },
-        { lat: centerLat - delta, lon: centerLon - delta },
-      ];
-
-      const pointData = await Promise.all(
-        points.map(async (p) => {
-          const data = await fetchNasaPowerData(p.lat, p.lon);
-          if (!data) return null;
-
-          const solarValues = Object.values(data.ALLSKY_SFC_SW_DWN || {});
-          const windValues = Object.values(data.WS10M || {});
-
-          const avgSolar =
-            solarValues.reduce((a, b) => a + b, 0) / solarValues.length || 0;
-          const avgWind =
-            windValues.reduce((a, b) => a + b, 0) / windValues.length || 0;
-
-          if (avgSolar <= 0 && avgWind <= 0) return null;
-
-          return { ...p, avgSolar, avgWind };
-        })
-      );
-
-      const validPoints = pointData.filter(Boolean);
-      if (!validPoints.length)
-        return `NASA POWER data unavailable for "${location}". Consider trying a nearby area.`;
-
-      // Rank points
-      const topSolar = validPoints
-        .sort((a, b) => b.avgSolar - a.avgSolar)
-        .slice(0, 3);
-      const topWind = validPoints
-        .sort((a, b) => b.avgWind - a.avgWind)
-        .slice(0, 3);
-
-      // Get readable addresses
-      const solarAddresses = await Promise.all(
-        topSolar.map(async (p, idx) => {
-          const address = await getStreetName(p.lat, p.lon);
-          return `${idx + 1}. ${address} - Avg Solar: ${p.avgSolar.toFixed(
-            2
-          )} kWh/m²/day`;
-        })
-      );
-
-      const windAddresses = await Promise.all(
-        topWind.map(async (p, idx) => {
-          const address = await getStreetName(p.lat, p.lon);
-          return `${idx + 1}. ${address} - Avg Wind: ${p.avgWind.toFixed(2)} m/s`;
-        })
-      );
-
-      return `Top Solar Locations in ${location}:\n${solarAddresses.join(
-        "\n"
-      )}\n\nTop Wind Locations in ${location}:\n${windAddresses.join("\n")}`;
-    } catch (err) {
-      console.error(err);
-      return "Error fetching top locations. Please try again.";
-    }
-  };
-
-  // Handle user pressing Enter
-  const handleKeyDown = async (e) => {
-    if (e.key === "Enter" && userInput.trim() !== "") {
-      if (!chatOpen) setChatOpen(true);
-
-      setChatMessages((prev) => [...prev, { sender: "user", text: userInput }]);
-
-      try {
-        // Detect if user asked about power locations
-        const locationRegex = /in ([a-zA-Z\s]+)/i;
-        const match = userInput.match(locationRegex);
-        let reply;
-
-        if (
-          /power station|solar|wind/i.test(userInput) &&
-          match &&
-          match[1]
-        ) {
-          reply = await getTopLocations(match[1]);
-        } else {
-          // Default OpenRouter fallback
-          const response = await fetch(
-            "https://openrouter.ai/api/v1/chat/completions",
-            {
-              method: "POST",
-              headers: {
-                Authorization:
-                  "Bearer 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",
-                "HTTP-Referer": "<YOUR_SITE_URL>",
-                "X-Title": "<Nasa>",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                model: "openai/gpt-oss-20b:freemty",
-                messages: [{ role: "user", content: userInput }],
-              }),
-            }
-          );
-
-          const data = await response.json();
-          reply = data.choices[0].message.content;
-        }
-
-        setChatMessages((prev) => [...prev, { sender: "assistant", text: reply }]);
-      } catch (error) {
-        console.error(error);
-        setChatMessages((prev) => [
-          ...prev,
-          {
-            sender: "assistant",
-            text: "Sorry, something went wrong. Please try again.",
-          },
-        ]);
-      }
-
-      setUserInput("");
-    }
-  };
-
-  return (
-    <div className="absolute bottom-4 left-4">
-      {/* Floating button */}
+  const chatUI = (
+    <div
+      id="chatbot-root"
+      className="flex flex-col items-start"
+      style={{
+        pointerEvents: "auto",
+      }}
+    >
+      {/* Floating Button */}
       <button
         onClick={() => setChatOpen(!chatOpen)}
-        className="bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg transition w-12 h-12 sm:w-14 sm:h-14"
+        className="bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg border-2 border-white transition-all w-12 h-12 sm:w-16 sm:h-16"
       >
-        <span className="text-white text-xl">🤖</span>
+        <span className="text-white text-xl sm:text-2xl">🤖</span>
       </button>
 
-      {/* Input popup when chat is closed */}
-      {!chatOpen && (
-        <div className="absolute bottom-16 left-0 w-64 bg-black/80 p-2 rounded-xl shadow-lg border border-gray-700">
-          <input
-            type="text"
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Where are we exploring today?"
-            className="w-full px-3 py-2 rounded-md bg-gray-900 text-white text-sm outline-none placeholder-gray-400"
-          />
-        </div>
-      )}
-
-      {/* Full chat interface */}
+      {/* Chat Box */}
       {chatOpen && (
-        <div className="absolute bottom-16 left-0 w-72 sm:w-80 bg-black/90 text-white rounded-xl shadow-lg border border-gray-700 flex flex-col">
-          <div className="p-3 flex-1 max-h-64 overflow-y-auto space-y-2">
+        <div className="mt-3 w-[90vw] sm:w-80 bg-black/90 text-white rounded-xl shadow-2xl border border-gray-700 flex flex-col max-h-[60vh] sm:max-h-[70vh] backdrop-blur-md">
+          <div className="p-3 flex-1 overflow-y-auto space-y-2">
+            {chatMessages.length === 0 && (
+              <p className="text-sm text-gray-400 text-center">
+                Ask me about solar or wind power 🌍
+              </p>
+            )}
             {chatMessages.map((msg, i) => (
               <div
                 key={i}
-                className={`p-2 rounded-lg text-sm max-w-[85%] ${
+                className={`p-2 rounded-lg text-sm max-w-[85%] break-words ${
                   msg.sender === "user"
                     ? "bg-green-600 self-end ml-auto"
                     : "bg-gray-700 self-start mr-auto"
@@ -836,20 +364,22 @@ const ChatBot = () => {
             ))}
           </div>
 
-          <div className="p-2 border-t border-gray-700">
+          <div className="p-2 border-t border-gray-700 bg-gray-800">
             <input
               type="text"
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type a message..."
-              className="w-full px-3 py-2 rounded-md bg-gray-800 text-white text-sm outline-none placeholder-gray-400"
+              className="w-full px-3 py-2 rounded-md bg-gray-700 text-white text-sm outline-none placeholder-gray-400"
             />
           </div>
         </div>
       )}
     </div>
   );
+
+  return createPortal(chatUI, document.body);
 };
 
 export default ChatBot;

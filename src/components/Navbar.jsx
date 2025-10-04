@@ -7,7 +7,7 @@ const Navbar = () => {
     <nav className="absolute top-0 left-0 w-full flex justify-between items-center px-4 sm:px-10 md:px-16 lg:px-22 py-4 bg-black/60 z-20">
       {/* Logo + Name */}
       <div className="flex items-center space-x-2">
-        <span className="text-white text-xl">🌌</span>
+        <span className="text-white text-xl" onClick={() => navigate("/")}>🌌</span>
         <span className="hidden sm:inline text-white font-bold text-lg cursor-pointer"
         onClick={() => navigate("/")}
         >
@@ -18,6 +18,7 @@ const Navbar = () => {
       {/* Nav Links ..*/}
       <div className="flex space-x-6">
         <a
+        onClick={() => navigate("/about")}
         href="#"
         className="!text-white hover:!text-blue-400 visited:!text-white active:!text-blue-500"
         >
@@ -32,6 +33,7 @@ const Navbar = () => {
         </a>
         <a
         href="#"
+        onClick={() => navigate("/insight")}
         className="!text-white hover:!text-blue-400 visited:!text-white active:!text-blue-500"
         >
         Insights

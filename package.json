@@ -11,13 +11,17 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
+    "d3-geo": "^3.1.1",
     "framer-motion": "^12.23.22",
+    "lucide-react": "^0.544.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-globe.gl": "^2.36.0",
     "react-router-dom": "^7.9.3",
+    "react-simple-maps": "^3.0.0",
     "tailwindcss": "^4.1.14",
-    "three": "^0.180.0"
+    "three": "^0.180.0",
+    "topojson-client": "^3.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
