@@ -211,7 +211,7 @@ const GlobeComponent = () => {
           <span className="text-white text-2xl">🤖</span>
         </button>
 
-        {/* Chat popup */}
+        {/* Chat popup.. */}
         {chatOpen && <ChatPopup />}
       </div>
     </div>

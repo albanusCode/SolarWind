@@ -9,7 +9,7 @@ const Navbar = () => {
         <span className="hidden sm:inline text-white font-bold text-lg">SolarWind</span>
       </div>
 
-      {/* Nav Links */}
+      {/* Nav Links ..*/}
       <div className="flex space-x-6">
         <a
         href="#"
