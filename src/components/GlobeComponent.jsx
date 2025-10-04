@@ -102,7 +102,7 @@ const GlobeComponent = () => {
             </span>{" "}
             by turning data into actionable opportunities.
           </p>
-          <button className="mt-4 px-4 py-2 text-white font-bold rounded-lg transition">
+          <button className="mt-4 px-4 py-2 bg-yellow-600 hover:bg-yellow-800 text-white font-bold rounded-lg transition">
             LET'S HERNESS
           </button>
         </div>
