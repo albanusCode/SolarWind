@@ -12,9 +12,13 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
     "framer-motion": "^12.23.22",
+    "leaflet": "^1.9.4",
+    "leaflet.heat": "^0.2.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-globe.gl": "^2.36.0",
+    "react-leaflet": "^5.0.0",
+    "react-select": "^5.10.2",
     "tailwindcss": "^4.1.14",
     "three": "^0.180.0"
   },
