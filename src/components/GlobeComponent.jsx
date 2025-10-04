@@ -1,16 +1,13 @@
 import React, { useRef, useEffect, useState } from "react";
 import Globe from "react-globe.gl";
 import * as THREE from "three";
+import ChatBot from "./ChatBot"; // Import the new ChatBot component
 
 const GlobeComponent = () => {
   const globeEl = useRef();
   const [displayText, setDisplayText] = useState("");
   const [loopIndex, setLoopIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
-
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [userInput, setUserInput] = useState("");
 
   const messages = [
     "The home of energy discovery.",
@@ -64,27 +61,6 @@ const GlobeComponent = () => {
     };
     adjustGlobe();
   }, []);
-
-  // Handle user pressing Enter
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && userInput.trim() !== "") {
-      // Open chat if not already open
-      if (!chatOpen) setChatOpen(true);
-
-      // Add user message
-      setChatMessages((prev) => [...prev, { sender: "user", text: userInput }]);
-
-      // Fake assistant reply
-      setTimeout(() => {
-        setChatMessages((prev) => [
-          ...prev,
-          { sender: "assistant", text: `Exploring: ${userInput}` },
-        ]);
-      }, 800);
-
-      setUserInput(""); // Clear input
-    }
-  };
 
   return (
     <div className="absolute inset-0 flex flex-col sm:flex-row items-center justify-between sm:px-12">
@@ -160,63 +136,8 @@ const GlobeComponent = () => {
         </button>
       </div>
 
-      {/* Assistant Icon + Chat */}
-      <div className="absolute bottom-4 left-4">
-        {/* Floating button */}
-        <button
-          onClick={() => setChatOpen(!chatOpen)}
-          className="bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg transition w-12 h-12 sm:w-14 sm:h-14"
-        >
-          <span className="text-white text-xl">🤖</span>
-        </button>
-
-        {/* Input popup when chat is closed */}
-        {!chatOpen && (
-          <div className="absolute bottom-16 left-0 w-64 bg-black/80 p-2 rounded-xl shadow-lg border border-gray-700">
-            <input
-              type="text"
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Where are we exploring today?"
-              className="w-full px-3 py-2 rounded-md bg-gray-900 text-white text-sm outline-none placeholder-gray-400"
-            />
-          </div>
-        )}
-
-        {/* Full chat interface */}
-        {chatOpen && (
-          <div className="absolute bottom-16 left-0 w-72 sm:w-80 bg-black/90 text-white rounded-xl shadow-lg border border-gray-700 flex flex-col">
-            {/* Chat messages */}
-            <div className="p-3 flex-1 max-h-64 overflow-y-auto space-y-2">
-              {chatMessages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`p-2 rounded-lg text-sm max-w-[85%] ${
-                    msg.sender === "user"
-                      ? "bg-green-600 self-end ml-auto"
-                      : "bg-gray-700 self-start mr-auto"
-                  }`}
-                >
-                  {msg.text}
-                </div>
-              ))}
-            </div>
-
-            {/* Input */}
-            <div className="p-2 border-t border-gray-700">
-              <input
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Type a message..."
-                className="w-full px-3 py-2 rounded-md bg-gray-800 text-white text-sm outline-none placeholder-gray-400"
-              />
-            </div>
-          </div>
-        )}
-      </div>
+      {/* ChatBot Component */}
+      <ChatBot />
     </div>
   );
 };
