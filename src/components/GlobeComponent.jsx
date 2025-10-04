@@ -64,6 +64,69 @@ const GlobeComponent = () => {
     adjustGlobe();
   }, []);
 
+  // --- Chat Popup Component ---
+  const ChatPopup = () => {
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState("");
+
+    const handleSend = () => {
+      if (!input.trim()) return;
+
+      // add user message
+      setMessages((prev) => [...prev, { sender: "user", text: input }]);
+
+      // mock assistant reply
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          { sender: "assistant", text: `Great choice! Let's explore ${input}` },
+        ]);
+      }, 800);
+
+      setInput("");
+    };
+
+    return (
+      <div className="absolute bottom-20 left-0 w-72 bg-black/95 text-white p-4 rounded-xl shadow-lg border border-gray-700 flex flex-col space-y-2">
+        {/* Messages */}
+        {messages.length > 0 && (
+          <div className="flex-1 max-h-60 overflow-y-auto space-y-2 pr-1">
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={`p-2 rounded-lg text-sm break-words ${
+                  msg.sender === "user"
+                    ? "bg-green-600 text-right ml-8"
+                    : "bg-gray-700 mr-8"
+                }`}
+              >
+                {msg.text}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Input */}
+        <div className="flex mt-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Where are we exploring today?"
+            className="flex-1 p-2 rounded-l-xl bg-gray-800 text-white border border-gray-600 focus:outline-none placeholder-gray-400"
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          />
+          <button
+            onClick={handleSend}
+            className="bg-green-500 px-3 rounded-r-xl hover:bg-green-600 transition"
+          >
+            ➤
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="absolute inset-0 flex flex-col sm:flex-row items-center sm:items-center justify-between sm:px-12">
       {/* Globe container */}
@@ -149,11 +212,7 @@ const GlobeComponent = () => {
         </button>
 
         {/* Chat popup */}
-        {chatOpen && (
-          <div className="absolute bottom-20 left-0 w-64 bg-black/80 text-white p-4 rounded-xl shadow-lg border border-gray-700">
-            <p className="text-sm font-semibold">Where are we exploring today?</p>
-          </div>
-        )}
+        {chatOpen && <ChatPopup />}
       </div>
     </div>
   );
