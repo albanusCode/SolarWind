@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import Globe from "react-globe.gl";
+import { useNavigate } from "react-router-dom";
 import * as THREE from "three";
 
 const GlobeComponent = () => {
@@ -64,6 +65,7 @@ const GlobeComponent = () => {
     };
     adjustGlobe();
   }, []);
+  const navigate = useNavigate();
 
   // Handle user pressing Enter
   const handleKeyDown = (e) => {
@@ -155,8 +157,11 @@ const GlobeComponent = () => {
           </span>{" "}
           by turning data into actionable opportunities.
         </p>
-        <button className="mt-4 px-4 py-2 bg-yellow-600 text-white font-bold rounded-lg hover:bg-yellow-800 transition">
-          LET'S HERNESS
+        <button
+          className="mt-4 px-4 py-2 bg-yellow-600 text-white font-bold rounded-lg hover:bg-yellow-800 transition"
+          onClick={() => navigate("/map")}
+        >
+          LET'S HERNES
         </button>
       </div>
 
