@@ -9,14 +9,16 @@ const GlobeComponent = () => {
   const [charIndex, setCharIndex] = useState(0);
 
   const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [userInput, setUserInput] = useState("");
 
   const messages = [
     "The home of energy discovery.",
     "Mapping regions for Solar and Wind power.",
-    "Harnessing renewable energy for a sustainable future."
+    "Harnessing renewable energy for a sustainable future.",
   ];
 
-  // Typing effect
+  // Typing effect for main banner
   useEffect(() => {
     const currentMessage = messages[loopIndex % messages.length];
     if (charIndex < currentMessage.length) {
@@ -38,7 +40,6 @@ const GlobeComponent = () => {
   // Globe setup
   useEffect(() => {
     if (!globeEl.current) return;
-
     const controls = globeEl.current.controls();
     controls.autoRotate = true;
     controls.autoRotateSpeed = 0.6;
@@ -64,71 +65,29 @@ const GlobeComponent = () => {
     adjustGlobe();
   }, []);
 
-  // --- Chat Popup Component ---
-  const ChatPopup = () => {
-    const [messages, setMessages] = useState([]);
-    const [input, setInput] = useState("");
+  // Handle user pressing Enter
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && userInput.trim() !== "") {
+      // Open chat if not already open
+      if (!chatOpen) setChatOpen(true);
 
-    const handleSend = () => {
-      if (!input.trim()) return;
+      // Add user message
+      setChatMessages((prev) => [...prev, { sender: "user", text: userInput }]);
 
-      // add user message
-      setMessages((prev) => [...prev, { sender: "user", text: input }]);
-
-      // mock assistant reply
+      // Fake assistant reply
       setTimeout(() => {
-        setMessages((prev) => [
+        setChatMessages((prev) => [
           ...prev,
-          { sender: "assistant", text: `Great choice! Let's explore ${input}` },
+          { sender: "assistant", text: `Exploring: ${userInput}` },
         ]);
       }, 800);
 
-      setInput("");
-    };
-
-    return (
-      <div className="absolute bottom-20 left-0 w-72 bg-black/95 text-white p-4 rounded-xl shadow-lg border border-gray-700 flex flex-col space-y-2">
-        {/* Messages */}
-        {messages.length > 0 && (
-          <div className="flex-1 max-h-60 overflow-y-auto space-y-2 pr-1">
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`p-2 rounded-lg text-sm break-words ${
-                  msg.sender === "user"
-                    ? "bg-green-600 text-right ml-8"
-                    : "bg-gray-700 mr-8"
-                }`}
-              >
-                {msg.text}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Input */}
-        <div className="flex mt-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Where are we exploring today?"
-            className="flex-1 p-2 rounded-l-xl bg-gray-800 text-white border border-gray-600 focus:outline-none placeholder-gray-400"
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          />
-          <button
-            onClick={handleSend}
-            className="bg-green-500 px-3 rounded-r-xl hover:bg-green-600 transition"
-          >
-            ➤
-          </button>
-        </div>
-      </div>
-    );
+      setUserInput(""); // Clear input
+    }
   };
 
   return (
-    <div className="absolute inset-0 flex flex-col sm:flex-row items-center sm:items-center justify-between sm:px-12">
+    <div className="absolute inset-0 flex flex-col sm:flex-row items-center justify-between sm:px-12">
       {/* Globe container */}
       <div className="relative w-full sm:w-1/2 h-[300px] sm:h-full flex items-center justify-center">
         <Globe
@@ -140,7 +99,7 @@ const GlobeComponent = () => {
           height={600}
         />
 
-        {/* Overlay text on mobile */}
+        {/* Mobile text overlay */}
         <div className="top-[120%] absolute inset-0 flex flex-col items-center justify-center text-center text-white px-4 sm:hidden">
           <h1 className="text-lg font-bold mb-2">Welcome to SolarWind</h1>
           <h2 className="text-sm text-green-300 mb-2 h-6">
@@ -171,7 +130,7 @@ const GlobeComponent = () => {
         </div>
       </div>
 
-      {/* Typing message on desktop */}
+      {/* Desktop text */}
       <div className="hidden sm:block w-1/2 text-white px-10">
         <h1 className="sm:text-4xl font-bold mb-6">Welcome to SolarWind</h1>
         <h2 className="text-2xl text-green-300 mb-6 h-10">
@@ -203,16 +162,60 @@ const GlobeComponent = () => {
 
       {/* Assistant Icon + Chat */}
       <div className="absolute bottom-4 left-4">
-        {/* Floating assistant button */}
+        {/* Floating button */}
         <button
           onClick={() => setChatOpen(!chatOpen)}
-          className="bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg transition w-14 h-14 sm:w-16 sm:h-16"
+          className="bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg transition w-12 h-12 sm:w-14 sm:h-14"
         >
-          <span className="text-white text-2xl">🤖</span>
+          <span className="text-white text-xl">🤖</span>
         </button>
 
-        {/* Chat popup.. */}
-        {chatOpen && <ChatPopup />}
+        {/* Input popup when chat is closed */}
+        {!chatOpen && (
+          <div className="absolute bottom-16 left-0 w-64 bg-black/80 p-2 rounded-xl shadow-lg border border-gray-700">
+            <input
+              type="text"
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Where are we exploring today?"
+              className="w-full px-3 py-2 rounded-md bg-gray-900 text-white text-sm outline-none placeholder-gray-400"
+            />
+          </div>
+        )}
+
+        {/* Full chat interface */}
+        {chatOpen && (
+          <div className="absolute bottom-16 left-0 w-72 sm:w-80 bg-black/90 text-white rounded-xl shadow-lg border border-gray-700 flex flex-col">
+            {/* Chat messages */}
+            <div className="p-3 flex-1 max-h-64 overflow-y-auto space-y-2">
+              {chatMessages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`p-2 rounded-lg text-sm max-w-[85%] ${
+                    msg.sender === "user"
+                      ? "bg-green-600 self-end ml-auto"
+                      : "bg-gray-700 self-start mr-auto"
+                  }`}
+                >
+                  {msg.text}
+                </div>
+              ))}
+            </div>
+
+            {/* Input */}
+            <div className="p-2 border-t border-gray-700">
+              <input
+                type="text"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type a message..."
+                className="w-full px-3 py-2 rounded-md bg-gray-800 text-white text-sm outline-none placeholder-gray-400"
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
