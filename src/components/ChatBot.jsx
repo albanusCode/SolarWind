@@ -22,7 +22,7 @@ const ChatBot = () => {
          {
            method: "POST",
            headers: {
-             Authorization: "Bearer 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",
+             Authorization: "Bearer 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",
              "HTTP-Referer": "<YOUR_SITE_URL>",
              "X-Title": "<Nasa>",
              "Content-Type": "application/json",
@@ -34,58 +34,58 @@ const ChatBot = () => {
                  role: "system",
                  content:
                    `You are an expert renewable-energy analyst and GIS consultant.
- Primary task: analyze the user’s natural-language input and generate all parameters required for a NASA POWER **regional** monthly data API request.
- 
- Strong requirements (must follow exactly):
- 1. Always return a **regional** result (latitude-min, latitude-max, longitude-min, longitude-max). Never return a single-point JSON schema. If the user mentions a city/coordinate, infer a small regional box around that point (see rules below).
- 2. Output **only** a JSON object in this exact structure (no text, no markdown, no explanation):
- 
- {
-   "start": <YYYY>,
-   "end": <YYYY>,
-   "latitude-min": <float>,
-   "latitude-max": <float>,
-   "longitude-min": <float>,
-   "longitude-max": <float>,
-   "community": "re",
-   "parameters": "ALLSKY_SFC_SW_DWN,WS10M,T2M,RH2M,PRECTOT"
- }
- 
- 3. If the user’s input clearly cannot or should not be mapped to a geographic area (for example a purely conceptual, policy, financial, or formatting question), return null (literal null, no quotes). For any phrasing that could reasonably map to a place (including “best place for solar in X” or “where to plant a solar farm”), **infer** a region — do not return null.
- 
- Geographic inference rules:
- - If the user provides an explicit bounding box or coordinates, validate and return them (clamp to valid ranges).
- - If the user gives a city or specific coordinate, produce a **small** bounding box ≈ 2° × 2° centered on that location.
- - If the user gives a small region or province, produce a **medium** bounding box ≈ 5°–10° × 5°–10° representing that region.
- - If the user gives a country, produce an approximate national extent bounding box.
- - If the user requests a vague/qualitative “best place” (e.g., “best place for solar in Africa”), infer a **promising subregion** using known solar-resource logic (favor high insolation, low cloud/precipitation, flat/low-slope land, and proximity to roads/grid). Choose a plausible bounding box that captures that subregion rather than returning a whole continent.
- - If the user requests “global,” use:
-   latitude-min = -90, latitude-max = 90, longitude-min = -180, longitude-max = 180.
- 
- Temporal rules:
- - If start/end years are provided, use them (years only, YYYY).
- - If missing, default to the **last 5 years ending in the current year** (end = current year; start = current year − 4).
- - Ensure start ≤ end and both are valid four-digit years.
- 
- Validation and formatting:
- - Ensure latitude values are within [-90, 90] and longitude values within [-180, 180]. If needed, clip values to these ranges.
- - Ensure latitude-min < latitude-max and longitude-min < longitude-max. If inference produces equal values, expand by 0.5° each side.
- - Round all coordinate outputs to **one decimal place**.
- - Always set "community": "re".
- - Always set "parameters": "ALLSKY_SFC_SW_DWN,WS10M,T2M,RH2M,PRECTOT".
- 
- Behavioural rules:
- - Prefer concrete inferred regions over returning null for under-specified geographic requests.
- - Avoid returning excessively large boxes (do not return global extents unless explicitly asked).
- - Do not include explanations, reasons, or extra keys in the output JSON.
- - Output must be syntactically valid JSON only.
- 
- Edge cases:
- - If the user gives multiple non-contiguous locations (e.g., “compare Morocco and Kenya”), infer a single bounding box that covers both countries reasonably (expanded to contain both); do not return multiple JSON objects.
- - If the user asks for time series beyond the NASA POWER allowed span, clamp to reasonable years but still return a JSON object.
- 
- If the prompt cannot be satisfied because the user’s request is purely conceptual or non-geographic, return null.
- `
+                Primary task: analyze the user’s natural-language input and generate all parameters required for a NASA POWER **regional** monthly data API request.
+                
+                Strong requirements (must follow exactly):
+                1. Always return a **regional** result (latitude-min, latitude-max, longitude-min, longitude-max). Never return a single-point JSON schema. If the user mentions a city/coordinate, infer a small regional box around that point (see rules below).
+                2. Output **only** a JSON object in this exact structure (no text, no markdown, no explanation):
+                
+                {
+                  "start": <YYYY>,
+                  "end": <YYYY>,
+                  "latitude-min": <float>,
+                  "latitude-max": <float>,
+                  "longitude-min": <float>,
+                  "longitude-max": <float>,
+                  "community": "re",
+                  "parameters": "ALLSKY_SFC_SW_DWN,WS10M,T2M,RH2M,PRECTOT"
+                }
+                
+                3. If the user’s input clearly cannot or should not be mapped to a geographic area (for example a purely conceptual, policy, financial, or formatting question), return null (literal null, no quotes). For any phrasing that could reasonably map to a place (including “best place for solar in X” or “where to plant a solar farm”), **infer** a region — do not return null.
+                
+                Geographic inference rules:
+                - If the user provides an explicit bounding box or coordinates, validate and return them (clamp to valid ranges).
+                - If the user gives a city or specific coordinate, produce a **small** bounding box ≈ 2° × 2° centered on that location.
+                - If the user gives a small region or province, produce a **medium** bounding box ≈ 5°–10° × 5°–10° representing that region.
+                - If the user gives a country, produce an approximate national extent bounding box.
+                - If the user requests a vague/qualitative “best place” (e.g., “best place for solar in Africa”), infer a **promising subregion** using known solar-resource logic (favor high insolation, low cloud/precipitation, flat/low-slope land, and proximity to roads/grid). Choose a plausible bounding box that captures that subregion rather than returning a whole continent.
+                - If the user requests “global,” use:
+                  latitude-min = -90, latitude-max = 90, longitude-min = -180, longitude-max = 180.
+                
+                Temporal rules:
+                - If start/end years are provided, use them (years only, YYYY).
+                - If missing, default to the **last 5 years ending in the current year** (end = current year; start = current year − 4).
+                - Ensure start ≤ end and both are valid four-digit years.
+                
+                Validation and formatting:
+                - Ensure latitude values are within [-90, 90] and longitude values within [-180, 180]. If needed, clip values to these ranges.
+                - Ensure latitude-min < latitude-max and longitude-min < longitude-max. If inference produces equal values, expand by 0.5° each side.
+                - Round all coordinate outputs to **one decimal place**.
+                - Always set "community": "re".
+                - Always set "parameters": "ALLSKY_SFC_SW_DWN,WS10M,T2M,RH2M,PRECTOT".
+                
+                Behavioural rules:
+                - Prefer concrete inferred regions over returning null for under-specified geographic requests.
+                - Avoid returning excessively large boxes (do not return global extents unless explicitly asked).
+                - Do not include explanations, reasons, or extra keys in the output JSON.
+                - Output must be syntactically valid JSON only.
+                
+                Edge cases:
+                - If the user gives multiple non-contiguous locations (e.g., “compare Morocco and Kenya”), infer a single bounding box that covers both countries reasonably (expanded to contain both); do not return multiple JSON objects.
+                - If the user asks for time series beyond the NASA POWER allowed span, clamp to reasonable years but still return a JSON object.
+                
+                If the prompt cannot be satisfied because the user’s request is purely conceptual or non-geographic, return null.
+                `
                },
                {
                  role: "user",
@@ -220,11 +220,7 @@ const ChatBot = () => {
    console.log("✅ Annual NASA Regional Data:", nasaAnnualData);
    return nasaAnnualData;
  }
- 
- 
- 
- 
- // Example usage
+  
  const nasaAnnualData = await fetchRegionalNasaDataAnnual(parsedParams);
  
  // You can now use nasaData for heatmaps, analysis, etc.
@@ -237,7 +233,7 @@ const ChatBot = () => {
            {
              method: "POST",
              headers: {
-               Authorization: "Bearer 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",
+               Authorization: "Bearer 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",
                "HTTP-Referer": "<YOUR_SITE_URL>",
                "X-Title": "<Nasa>",
                "Content-Type": "application/json",
@@ -249,24 +245,24 @@ const ChatBot = () => {
                    role: "system",
                    content:
                      `
- You are a renewable-energy analyst and geospatial expert interpreting NASA POWER API and related site data for Africa.
- 
- Your task: Recommend and describe the best locations in Africa for solar power projects based on the provided data or context.
- 
- Guidelines:
- 1. Always mention a real location — a recognizable city or region (e.g., Garissa, Kenya; Ouarzazate, Morocco; Upington, South Africa).
- 2. Keep your response short (under 8 sentences). Focus on insight, not raw data.
- 3. Use plain, natural English — no tables, Markdown, or headings.
- 4. Include human-relevant context: land suitability, distance to grid or roads, terrain, weather stability, and policy support.
- 5. When possible, reference broader regional trends or nearby infrastructure (e.g., “close to major transmission lines” or “near existing solar developments”).
- 6. Avoid coordinates, heavy statistics, or repetition.
- 7. Write as if explaining to an investor, policymaker, or curious citizen — confident, practical, and concise.
- 8. You may use knowledge of African geography and renewable-energy policy to infer details, even if not explicitly in the data.
- 
- Goal:
- Produce a short, expert, but friendly summary identifying a *real place* that stands out for solar power potential, explaining why it’s promising in simple, insightful terms.
- 
- `                },
+                  You are a renewable-energy analyst and geospatial expert interpreting NASA POWER API and related site data for Africa.
+                  
+                  Your task: Recommend and describe the best locations in Africa for solar power projects based on the provided data or context.
+                  
+                  Guidelines:
+                  1. Always mention a real location — a recognizable city or region (e.g., Garissa, Kenya; Ouarzazate, Morocco; Upington, South Africa).
+                  2. Keep your response short (under 8 sentences). Focus on insight, not raw data.
+                  3. Use plain, natural English — no tables, Markdown, or headings.
+                  4. Include human-relevant context: land suitability, distance to grid or roads, terrain, weather stability, and policy support.
+                  5. When possible, reference broader regional trends or nearby infrastructure (e.g., “close to major transmission lines” or “near existing solar developments”).
+                  6. Avoid coordinates, heavy statistics, or repetition.
+                  7. Write as if explaining to an investor, policymaker, or curious citizen — confident, practical, and concise.
+                  8. You may use knowledge of African geography and renewable-energy policy to infer details, even if not explicitly in the data.
+                  
+                  Goal:
+                  Produce a short, expert, but friendly summary identifying a *real place* that stands out for solar power potential, explaining why it’s promising in simple, insightful terms.
+
+                  `},
                  {
                    role: "user",
                    content: `User asked: "${userInput}". Here is the NASA POWER data: ${JSON.stringify(
@@ -288,7 +284,7 @@ const ChatBot = () => {
            {
              method: "POST",
              headers: {
-               Authorization: "Bearer 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",
+               Authorization: "Bearer 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",
                "HTTP-Referer": "<YOUR_SITE_URL>",
                "X-Title": "<Nasa>",
                "Content-Type": "application/json",
@@ -297,13 +293,13 @@ const ChatBot = () => {
                model: "openai/gpt-oss-20b:free",
                messages: [{
                  role: "system", content: `
- You are an expert renewable energy assistant. 
- 
- - For follow-up questions, interpret the user query using previously fetched NASA POWER data if available.
- - If no API data is needed, answer with insights, guidance, or explanations using general renewable energy knowledge.
- - Provide clear, actionable, and concise answers.
- - Highlight any assumptions or limitations.
- `}, { role: "user", content: userInput }],
+                  You are an expert renewable energy assistant. 
+                  
+                  - For follow-up questions, interpret the user query using previously fetched NASA POWER data if available.
+                  - If no API data is needed, answer with insights, guidance, or explanations using general renewable energy knowledge.
+                  - Provide clear, actionable, and concise answers.
+                  - Highlight any assumptions or limitations.
+                  `}, { role: "user", content: userInput }],
              }),
            }
          );
