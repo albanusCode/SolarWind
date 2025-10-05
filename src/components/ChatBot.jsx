@@ -27,7 +27,7 @@ const ChatBot = () => {
          {
            method: "POST",
            headers: {
-             Authorization: "Bearer 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",
+             Authorization: "Bearer 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",
              "HTTP-Referer": "<YOUR_SITE_URL>",
              "X-Title": "<Nasa>",
              "Content-Type": "application/json",
@@ -239,7 +239,7 @@ const ChatBot = () => {
            {
              method: "POST",
              headers: {
-               Authorization: "Bearer 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",
+               Authorization: "Bearer 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",
                "HTTP-Referer": "<YOUR_SITE_URL>",
                "X-Title": "<Nasa>",
                "Content-Type": "application/json",
@@ -291,7 +291,7 @@ const ChatBot = () => {
            {
              method: "POST",
              headers: {
-               Authorization: "Bearer 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",
+               Authorization: "Bearer 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",
                "HTTP-Referer": "<YOUR_SITE_URL>",
                "X-Title": "<Nasa>",
                "Content-Type": "application/json",

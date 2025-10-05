@@ -301,7 +301,7 @@ export default function Map() {
       setGeoData(formattedAll);
       setBestPoints(formattedBest);
 
-       const insightText = await generateInsights(formattedAll, formattedBest, dataType, selectedCountry);
+       const insightText = generateInsights(formattedAll, formattedBest, dataType, selectedCountry);
        setAiInsight(insightText);
     } catch (err) {
       console.error("Data load failed:", err);
@@ -380,7 +380,7 @@ Sample Data: ${JSON.stringify(payload.sampleData.slice(0, 5))}
     const normalResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: "Bearer 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",
+        Authorization: "Bearer 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",
         "HTTP-Referer": "https://yourapp.com", // replace with your domain
         "X-Title": "GeoRenew Insight",
         "Content-Type": "application/json",
@@ -574,7 +574,7 @@ Sample Data: ${JSON.stringify(payload.sampleData.slice(0, 5))}
   position: "absolute",
   top: "190px",
   right: showSidebar ? "290px" : "10px",
-  zIndex: 900,
+  zIndex: 1000,
   background: "rgba(255, 255, 255, 0.85)", // 👈 light glass
   color: "#1e293b", // dark text
   border: "1px solid rgba(255,255,255,0.4)",
@@ -607,7 +607,7 @@ onMouseLeave={(e) => {
         position: "absolute",
         top: "189px",
         right: showSidebar ? "16px" : "-300px", // 👈 slide in/out
-        zIndex: 1000,
+        zIndex: 900,
         background: "rgba(255, 255, 255, 0.7)",
         padding: "12px",
         borderRadius: "14px",
