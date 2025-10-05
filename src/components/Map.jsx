@@ -280,6 +280,10 @@ export default function Map() {
   const [dataType, setDataType] = useState("ALLSKY_KT"); // solar by default
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [loading, setLoading] = useState(false);
+  
+  const [aiInsight, setAiInsight] = useState(null);
+  const [showSidebar, setShowSidebar] = useState(true);
+
 
   useEffect(() => {
 
@@ -296,6 +300,9 @@ export default function Map() {
       const formattedBest = transformToGeoJSON(filtered, dataType, selectedCountry);
       setGeoData(formattedAll);
       setBestPoints(formattedBest);
+
+       const insightText = await generateInsights(formattedAll, formattedBest, dataType, selectedCountry);
+       setAiInsight(insightText);
     } catch (err) {
       console.error("Data load failed:", err);
     } finally {
@@ -306,6 +313,97 @@ export default function Map() {
 
     loadData();
   }, [dataType, selectedCountry]);
+
+  async function generateInsights(geoData, bestPoints, dataType, selectedCountry) {
+  if (!geoData || !selectedCountry) return "No data available for analysis.";
+
+  const values = geoData.features.map((f) => f.properties.value);
+  const avg = values.reduce((a, b) => a + b, 0) / values.length;
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+
+  const payload = {
+    country: selectedCountry?.properties?.name,
+    dataType,
+    summaryStats: {
+      average: avg,
+      min,
+      max,
+      totalPoints: values.length,
+      bestPointsCount: bestPoints?.features?.length || 0,
+    },
+    sampleData: geoData.features.slice(0, 50).map((f) => ({
+      coordinates: f.geometry.coordinates,
+      value: f.properties.value,
+    })),
+  };
+
+  const dataTypeName =
+    dataType === "ALLSKY_KT" ? "Solar (ALLSKY_KT)" : "Wind (WS50M)";
+
+  const systemPrompt = `You are “GeoRenew Expert” — a domain expert in renewable energy geospatial analytics.  
+Your input:  
+- country name  
+- data type (ALLSKY_KT or WS50M)  
+- summary statistics: average, min, max, total points, best point count  
+- sample of spatial points (lat/lon + value)  
+
+Your task: produce an **insight summary** that a policy-maker, renewable energy planner, or investor would want. Cover:
+
+1. Overall potential: how good is the resource vs common benchmarks  
+2. Spatial patterns: where it’s strongest or weakest, any clustering or zones  
+3. Anomalies or surprises: what stands out  
+4. Risks or limitations: what could reduce the usefulness  
+5. Actionable recommendation: what one should do next (e.g. where to site, what further data to collect, what threshold to aim for)
+
+Requirements:  
+- Plain text only (no JSON, minimal bullet points allowed)  
+- Tone: professional but accessible  
+- Length: about 80-120 words  
+- Do *not* speculate beyond data (if sample does not show pattern, say “not enough evidence for spatial cluster”)  
+
+Output format:
+
+🤖 AI Insight — {country}, {dataTypeName}  
+{Analytical summary: ~2 paragraphs}  
+Key Recommendation: {one strong next-step}
+`;
+
+  const userPrompt = `
+Country: ${payload.country}
+Data Type: ${dataTypeName}
+Summary: ${JSON.stringify(payload.summaryStats)}
+Sample Data: ${JSON.stringify(payload.sampleData.slice(0, 5))}
+`;
+
+  try {
+    const normalResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer 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",
+        "HTTP-Referer": "https://yourapp.com", // replace with your domain
+        "X-Title": "GeoRenew Insight",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "openai/gpt-oss-20b:free",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+      }),
+    });
+
+    const normalData = await normalResponse.json();
+    const reply = normalData?.choices?.[0]?.message?.content?.trim();
+
+    return reply || "No insight generated.";
+  } catch (err) {
+    console.error("Insight generation failed:", err);
+    return "⚠️ Insight unavailable (API error).";
+  }
+}
+
 
    return (
     <>
@@ -466,6 +564,176 @@ export default function Map() {
         </style>
       </div>
     )}
+ {/* Sidebar AI Insights */}
+{geoData && !loading && (
+  <>
+    {/* Toggle Button */}
+    <button
+      onClick={() => setShowSidebar((prev) => !prev)}
+      style={{
+  position: "absolute",
+  top: "190px",
+  right: showSidebar ? "290px" : "10px",
+  zIndex: 1100,
+  background: "rgba(255, 255, 255, 0.85)", // 👈 light glass
+  color: "#1e293b", // dark text
+  border: "1px solid rgba(255,255,255,0.4)",
+  borderRadius: "50%",
+  width: "28px",
+  height: "28px",
+  cursor: "pointer",
+  fontSize: "12px",
+  fontWeight: "700",
+  transition: "right 0.3s ease-in-out, background 0.2s, color 0.2s",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+  backdropFilter: "blur(8px)", // softens against dark map
+}}
+onMouseEnter={(e) => {
+  e.currentTarget.style.background = "rgba(255,255,255,0.95)";
+  e.currentTarget.style.color = "#0f172a";
+}}
+onMouseLeave={(e) => {
+  e.currentTarget.style.background = "rgba(255,255,255,0.85)";
+  e.currentTarget.style.color = "#1e293b";
+}}
+
+    >
+      {showSidebar ? "→" : "←"}
+    </button>
+
+    {/* Sidebar */}
+    <div
+      style={{
+        position: "absolute",
+        top: "189px",
+        right: showSidebar ? "16px" : "-300px", // 👈 slide in/out
+        zIndex: 1000,
+        background: "rgba(255, 255, 255, 0.7)",
+        padding: "12px",
+        borderRadius: "14px",
+        width: "262px",
+        height: "250px",
+        overflowY: "auto",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+        backdropFilter: "blur(10px)",
+        border: "1px solid rgba(255,255,255,0.3)",
+        fontFamily: "Inter, sans-serif",
+        color: "#222",
+        fontSize: "9px",
+        lineHeight: "1.3",
+        transition: "right 0.4s ease-in-out",
+      }}
+      className="styled-scroll"
+    >
+      {/* --- Header --- */}
+      <div
+        style={{
+          fontWeight: 700,
+          marginBottom: "8px",
+          fontSize: "9.5px",
+          letterSpacing: "0.2px",
+        }}
+      >
+        📊 Data Insights
+      </div>
+
+      {/* --- Top Row (Country + Type) --- */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: "6px",
+          marginBottom: "5px",
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ flex: 1 }}>
+          <strong>Country:</strong>{" "}
+          {selectedCountry?.properties?.name || "N/A"}
+        </div>
+        <div style={{ flex: 1 }}>
+          <strong>Type:</strong>{" "}
+          {dataType === "ALLSKY_KT" ? "Solar (ALLSKY_KT)" : "Wind (WS50M)"}
+        </div>
+      </div>
+
+      {/* --- Key Stats --- */}
+      <div
+        style={{
+          marginBottom: "6px",
+          display: "flex",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+        }}
+      >
+        <div>
+          <strong>Total Points:</strong>{" "}
+          {geoData.features.length.toLocaleString()}
+        </div>
+        <div>
+          <strong>Best Points:</strong>{" "}
+          {bestPoints?.features?.length?.toLocaleString() || 0}
+        </div>
+      </div>
+
+      {/* --- Summary Stats --- */}
+      <div
+        style={{
+          marginTop: "6px",
+          borderTop: "1px solid #ddd",
+          paddingTop: "6px",
+        }}
+      >
+        {(() => {
+          const values = geoData.features.map((f) => f.properties.value);
+          const avg = values.reduce((a, b) => a + b, 0) / values.length || 0;
+          const max = Math.max(...values);
+          const min = Math.min(...values);
+          return (
+            <>
+              <div>
+                <strong>Average:</strong> {avg.toFixed(3)}
+              </div>
+              <div>
+                <strong>Max:</strong> {max.toFixed(3)}
+              </div>
+              <div>
+                <strong>Min:</strong> {min.toFixed(3)}
+              </div>
+            </>
+          );
+        })()}
+      </div>
+
+      {/* --- AI Insight Section --- */}
+      {aiInsight && (
+        <div
+          style={{
+            marginTop: "8px",
+            paddingTop: "6px",
+            borderTop: "1px solid #ddd",
+            fontSize: "9px",
+            lineHeight: "1.4",
+            color: "#222",
+            whiteSpace: "pre-line",
+          }}
+        >
+          <div
+            style={{
+              fontWeight: 700,
+              marginBottom: "4px",
+              fontSize: "9.5px",
+            }}
+          >
+            🤖 AI Insight
+          </div>
+          {aiInsight}
+        </div>
+      )}
+    </div>
+  </>
+)}
+
 
     
     <MapContainer

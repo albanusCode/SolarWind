@@ -27,7 +27,7 @@ const ChatBot = () => {
          {
            method: "POST",
            headers: {
-             Authorization: "Bearer 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",
+             Authorization: "Bearer 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",
              "HTTP-Referer": "<YOUR_SITE_URL>",
              "X-Title": "<Nasa>",
              "Content-Type": "application/json",
@@ -239,7 +239,7 @@ const ChatBot = () => {
            {
              method: "POST",
              headers: {
-               Authorization: "Bearer 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",
+               Authorization: "Bearer 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",
                "HTTP-Referer": "<YOUR_SITE_URL>",
                "X-Title": "<Nasa>",
                "Content-Type": "application/json",
@@ -263,7 +263,7 @@ const ChatBot = () => {
                   5. When possible, reference broader regional trends or nearby infrastructure (e.g., “close to major transmission lines” or “near existing solar developments”).
                   6. Avoid coordinates, heavy statistics, or repetition.
                   7. Write as if explaining to an investor, policymaker, or curious citizen — confident, practical, and concise.
-                  8. You may use knowledge of African geography and renewable-energy policy to infer details, even if not explicitly in the data.
+                  8. You may use knowledge of global geography and renewable-energy policy to infer details, even if not explicitly in the data.
                   
                   Goal:
                   Produce a short, expert, but friendly summary identifying a *real place* that stands out for solar power potential, explaining why it’s promising in simple, insightful terms.
@@ -291,7 +291,7 @@ const ChatBot = () => {
            {
              method: "POST",
              headers: {
-               Authorization: "Bearer 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",
+               Authorization: "Bearer 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",
                "HTTP-Referer": "<YOUR_SITE_URL>",
                "X-Title": "<Nasa>",
                "Content-Type": "application/json",
