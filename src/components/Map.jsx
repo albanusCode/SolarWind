@@ -309,59 +309,6 @@ export default function Map() {
 
    return (
     <>
-    {/* <div
-      style={{
-        position: "absolute",
-        top: 10,
-        left: 10,
-        zIndex: 1000,
-        background: "rgba(255,255,255,0.9)",
-        padding: "8px 12px",
-        borderRadius: "8px",
-        width: "260px",
-      }}
-    >
-      <div style={{ marginBottom: "6px", fontWeight: "bold" }}>Select Country</div>
-      <Select
-        options={countriesData.features.map((f) => ({
-          value: f.properties.name,
-          label: f.properties.name,
-          feature: f,
-        }))}
-        onChange={(opt) => setSelectedCountry(opt.feature)}
-        placeholder="Search country..."
-        isSearchable
-      />
-
-      <div style={{ marginTop: "10px" }}>
-        <button
-          onClick={() => setDataType("ALLSKY_KT")}
-          style={{
-            marginRight: 10,
-            background: dataType === "ALLSKY_KT" ? "#ffcc00" : "#eee",
-            border: "none",
-            padding: "6px 10px",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
-          ☀️ Solar
-        </button>
-        <button
-          onClick={() => setDataType("WS10M")}
-          style={{
-            background: dataType === "WS10M" ? "#00b7ff" : "#eee",
-            border: "none",
-            padding: "6px 10px",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
-          💨 Wind
-        </button>
-      </div>
-    </div> */}
-
     <div
       style={{
         position: "absolute",
@@ -524,7 +471,7 @@ export default function Map() {
     <MapContainer
       center={[-1.286389, 36.817223]}
       zoom={6}
-      style={{ height: "100vh", width: "100%" }}
+      style={{ height: "calc(100vh - 64px)", width: "100%", marginTop: "64px" }}
     >
       {/* <TileLayer
         attribution='&copy; OpenStreetMap contributors'

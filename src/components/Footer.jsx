@@ -1,7 +1,10 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Facebook, Twitter, Instagram, Linkedin, Mail } from "lucide-react";
 
 const Footer = () => {
+  const navigate = useNavigate();
   return (
     <footer className="bg-gray-900 text-gray-300">
       {/* Main Footer */}
@@ -25,8 +28,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-white mb-3">Company</h3>
             <ul className="space-y-2 text-sm">
               <li><a href="/about" className="hover:text-orange-400">About Us</a></li>
-              <li><a href="/services" className="hover:text-orange-400">Services</a></li>
-              <li><a href="/projects" className="hover:text-orange-400">Projects</a></li>
+              <li><a href="" className="hover:text-orange-400">Services</a></li>
               <li><a href="/careers" className="hover:text-orange-400">Careers</a></li>
             </ul>
           </div>
@@ -34,9 +36,13 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-white mb-3">Resources</h3>
             <ul className="space-y-2 text-sm">
               <li><a href="/blog" className="hover:text-orange-400">Blog</a></li>
-              <li><a href="/faq" className="hover:text-orange-400">FAQ</a></li>
-              <li><a href="/contact" className="hover:text-orange-400">Contact</a></li>
-              <li><a href="/support" className="hover:text-orange-400">Support</a></li>
+              <li>
+                <Link to="/insight#faq" className="hover:text-orange-400">
+                  FAQ
+                </Link>
+              </li>
+              <li><a href="" className="hover:text-orange-400">Contact</a></li>
+              <li><a href="" className="hover:text-orange-400">Support</a></li>
             </ul>
           </div>
         </div>

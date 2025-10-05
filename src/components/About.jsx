@@ -29,7 +29,8 @@ const About = () => {
         <p className="text-lg md:text-xl font-medium md:w-1/2">
             We are proud to offer a wide range of solar energy services, including{" "}
             <span className="font-semibold">
-            solar panel installation, maintenance, and repair.
+            solar panel installation, maintenance, and repair. See 
+            <a href="/map" className="text-blue-400"> map</a> to find out if your location is suitable.
             </span>
         </p>
 
@@ -55,26 +56,26 @@ const About = () => {
         </video>
         <p className="absolute bottom-4 left-6 text-white text-lg md:text-xl">
             What solar can make{" "}
-            <span className="text-orange-500 font-semibold">changes.</span>
+            <span className="text-blue-500 font-semibold">changes.</span>
         </p>
         </div>
 
         {/* Numbers */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div>
-            <p className="text-4xl font-bold text-orange-500">210+</p>
+            <p className="text-4xl font-bold text-blue-500">210+</p>
             <p className="text-gray-500">Commercial Installations</p>
           </div>
           <div>
-            <p className="text-4xl font-bold text-orange-500">510+</p>
+            <p className="text-4xl font-bold text-blue-500">510+</p>
             <p className="text-gray-500">Residentials</p>
           </div>
           <div>
-            <p className="text-4xl font-bold text-orange-500">18GW</p>
+            <p className="text-4xl font-bold text-blue-500">18GW</p>
             <p className="text-gray-500">Power Produced</p>
           </div>
           <div>
-            <p className="text-4xl font-bold text-orange-500">15%</p>
+            <p className="text-4xl font-bold text-blue-500">15%</p>
             <p className="text-gray-500">City’s Electricity Supply</p>
           </div>
         </div>
