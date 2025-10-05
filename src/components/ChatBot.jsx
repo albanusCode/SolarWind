@@ -5,6 +5,11 @@ const ChatBot = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [userInput, setUserInput] = useState("");
+
+  const apiHistory = chatMessages.map(m => ({
+  role: m.sender === "user" ? "user" : "assistant",
+  content: m.text
+}));
    
  // Handle user pressing Enter
  const handleKeyDown = async (e) => {
@@ -12,7 +17,7 @@ const ChatBot = () => {
      if (!chatOpen) setChatOpen(true);
  
      setChatMessages((prev) => [...prev, { sender: "user", text: userInput }]);
- 
+    
      try {
        let reply = "";
  
@@ -22,7 +27,7 @@ const ChatBot = () => {
          {
            method: "POST",
            headers: {
-             Authorization: "Bearer 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",
+             Authorization: "Bearer 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",
              "HTTP-Referer": "<YOUR_SITE_URL>",
              "X-Title": "<Nasa>",
              "Content-Type": "application/json",
@@ -100,6 +105,7 @@ const ChatBot = () => {
        console.log("parsed params", paramCheckData)
          const parsedParams = JSON.parse(paramCheckData.choices[0].message.content);
          console.log("parsed params", parsedParams)
+         
  
        if (parsedParams) {
          // Step 2: Call NASA POWER API
@@ -233,7 +239,7 @@ const ChatBot = () => {
            {
              method: "POST",
              headers: {
-               Authorization: "Bearer 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",
+               Authorization: "Bearer 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",
                "HTTP-Referer": "<YOUR_SITE_URL>",
                "X-Title": "<Nasa>",
                "Content-Type": "application/json",
@@ -262,7 +268,7 @@ const ChatBot = () => {
                   Goal:
                   Produce a short, expert, but friendly summary identifying a *real place* that stands out for solar power potential, explaining why it’s promising in simple, insightful terms.
 
-                  `},
+                  `}, ...apiHistory,
                  {
                    role: "user",
                    content: `User asked: "${userInput}". Here is the NASA POWER data: ${JSON.stringify(
@@ -276,6 +282,7 @@ const ChatBot = () => {
  
          const analysisData = await analysisResponse.json();
          reply = analysisData.choices[0].message.content;
+        
          console.log(analysisData)
        } else {
          // Step 4: If no API call is needed, just respond with LLM normally
@@ -284,7 +291,7 @@ const ChatBot = () => {
            {
              method: "POST",
              headers: {
-               Authorization: "Bearer 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",
+               Authorization: "Bearer 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",
                "HTTP-Referer": "<YOUR_SITE_URL>",
                "X-Title": "<Nasa>",
                "Content-Type": "application/json",
@@ -299,13 +306,14 @@ const ChatBot = () => {
                   - If no API data is needed, answer with insights, guidance, or explanations using general renewable energy knowledge.
                   - Provide clear, actionable, and concise answers.
                   - Highlight any assumptions or limitations.
-                  `}, { role: "user", content: userInput }],
+                  `}, ...apiHistory, { role: "user", content: userInput }]
              }),
            }
          );
  
          const normalData = await normalResponse.json();
          reply = normalData.choices[0].message.content;
+         console.log(chatMessages)
        }
  
        setChatMessages((prev) => [...prev, { sender: "assistant", text: reply }]);
@@ -316,7 +324,7 @@ const ChatBot = () => {
          { sender: "assistant", text: "Sorry, something went wrong. Please try again." },
        ]);
      }
- 
+     
      setUserInput("");
    }
  };
