@@ -574,7 +574,7 @@ Sample Data: ${JSON.stringify(payload.sampleData.slice(0, 5))}
   position: "absolute",
   top: "190px",
   right: showSidebar ? "290px" : "10px",
-  zIndex: 1100,
+  zIndex: 900,
   background: "rgba(255, 255, 255, 0.85)", // 👈 light glass
   color: "#1e293b", // dark text
   border: "1px solid rgba(255,255,255,0.4)",
